@@ -1,0 +1,21 @@
+<table>
+  <tbody>
+    <tr>
+      <th><%= l('holidays.settings.label') %>:</th>
+      <td>
+        <p>
+          <label><%= l('holidays.settings.option_watchers') %>:</label>
+          <%= check_box_tag "settings[notify_watchers]", true, @settings['notify_watchers'] %>
+        </p>
+        <p>
+          <label><%= l('holidays.settings.option_author') %>:</label>
+          <%= check_box_tag "settings[notify_author]", true, @settings['notify_author'] %>
+        </p>
+        <p>
+          <label><%= l('holidays.settings.option_assignee') %>:</label>
+          <%= check_box_tag "settings[notify_assignee]", true, @settings['notify_assignee'] %>
+        </p>
+      </td>
+    </tr>
+  </tbody>
+</table>

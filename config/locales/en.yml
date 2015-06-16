@@ -1,0 +1,13 @@
+# English strings go here for Rails i18n
+en:
+  # my_label: "My label"
+  field_proxy_user: "Stand-in"
+
+  holidays:
+    mail_subject_append: " copy for Stand-in"
+    no_proxy: "no stand-in"
+    settings:
+      label: "Send notifications to stand-ins of"
+      option_watchers: "watchers"
+      option_author: "author"
+      option_assignee: "assignees"

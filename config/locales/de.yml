@@ -1,0 +1,13 @@
+# English strings go here for Rails i18n
+de:
+  # my_label: "My label"
+  field_proxy_user: "Vertretung"
+
+  holidays:
+    mail_subject_append: " Kopie für Urlaubsvertretung"
+    no_proxy: "keine Vertretung"
+    settings:
+      label: "Benachrichtige Vertreter von"
+      option_watchers: "Beobachtern"
+      option_author: "Autor"
+      option_assignee: "Zugewiesenen"
