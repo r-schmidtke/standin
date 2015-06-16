@@ -14,7 +14,7 @@ module StandIn
         #this part checks if the assignee is a group
         if(User.find_by_id(context[:issue].assigned_to_id) != nil)
           relevant_users << User.find_by_id(context[:issue].assigned_to_id) unless context[:issue].assigned_to_id == nil
-        else (Group.find_by_id(context[:issue].assigned_to_id) != nil)
+        elsif (Group.find_by_id(context[:issue].assigned_to_id) != nil)
           relevant_users.concat(Group.find_by_id(context[:issue].assigned_to_id).users)
         end
       end
