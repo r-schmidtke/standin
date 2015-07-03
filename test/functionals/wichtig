@@ -1,0 +1,7 @@
+class irgendwas < dingstestcase
+
+fixtures :users, :andere
+
+test eins
+
+end

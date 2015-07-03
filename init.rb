@@ -1,7 +1,10 @@
-require_dependency 'standin/hooks'
-require_dependency 'standin/controller_issues_edit_after_save_hook'
-require_dependency 'standin/controller_issues_new_after_save_hook'
+require_dependency 'stand_in/hooks'
+require_dependency 'stand_in/controller_issues_edit_after_save_hook'
+require_dependency 'stand_in/controller_issues_new_after_save_hook'
 
+ActionDispatch::Callbacks.to_prepare do
+  User.send(:include, StandIn::Patches::CirclePatch)
+end
 
 Redmine::Plugin.register :standin do
   name 'Stand-in Plugin'

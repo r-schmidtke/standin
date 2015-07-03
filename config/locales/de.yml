@@ -6,6 +6,8 @@ de:
   holidays:
     mail_subject_append: " Kopie für Urlaubsvertretung"
     no_proxy: "keine Vertretung"
+    errors:
+      invalid_proxy_user: "Dieser Nutzer ist momentan nicht als Vertretung verfügbar"
     settings:
       label: "Benachrichtige Vertreter von"
       option_watchers: "Beobachtern"

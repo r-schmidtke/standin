@@ -6,6 +6,8 @@ en:
   holidays:
     mail_subject_append: " copy for Stand-in"
     no_proxy: "no stand-in"
+    errors:
+      invalid_proxy_user: "This user is not currently available as a stand-in"
     settings:
       label: "Send notifications to stand-ins of"
       option_watchers: "watchers"
