@@ -1,17 +1,12 @@
 require File.expand_path('../../test_helper', __FILE__)
 
 class StandinIntegrationTest < Redmine::IntegrationTest
-  fixtures :projects, :users, :email_addresses, :members, :member_roles, :roles,
+  fixtures :projects, :users, :email_addresses, :members, :member_roles, :roles, :watchers,
            :groups_users,
-           :trackers, :projects_trackers,
-           :enabled_modules,
            :versions,
-           :issue_statuses, :issue_categories, :issue_relations, :workflows,
            :enumerations,
-           :issues, :journals, :journal_details,
-           :custom_fields, :custom_fields_projects, :custom_fields_trackers, :custom_values,
-           :time_entries
-  
+           :issues, :journals, :journal_details
+
   #log in as admin and enable plugin settings
   def setup
     log_user('admin', 'admin')
@@ -20,8 +15,17 @@ class StandinIntegrationTest < Redmine::IntegrationTest
     	 "notify_author"=>"true", 
     	 "notify_assignee"=>"true"}, 
     	 "commit"=>"Apply"
+    
+    6.times do |i|
+      userpref = User.find(i+1).pref
+      userpref.proxy_user_id = 0
+      assert userpref.save
+      usernotifications = User.find(i+1)
+      usernotifications.mail_notification = "only_my_events"
+      assert usernotifications.save
+    end
   end
-
+  
   #see if the plugin settings page loads
   def test_load_settings_page
   	get "/settings/plugin/standin"
@@ -65,44 +69,96 @@ class StandinIntegrationTest < Redmine::IntegrationTest
   #check if mailer will send the correct number of additional notifications  
   def test_edit_issue_single    
     #set a stand-in for user 1
-    user3pref = User.find(2).pref
-    user3pref.proxy_user_id = 1
-    assert user3pref.save
+    userpref = User.find(2).pref
+    userpref.proxy_user_id = 1
+    assert userpref.save
 
     ActionMailer::Base.deliveries.clear
 
-    patch "/issues/1",
-    	  "issue"=>{"notes"=>"testaenderung"},
+    patch "/issues/1", 
+    	  "issue"=>{"notes"=>"test_edit_issue_single"},
     	  "commit"=>"Sumbit",
     	  "id"=>"1"
     sleep(1)
-    #1 normal notification to author + 1 mail to authors stand-in
+    #1 normal notification mail + 1 mail to authors stand-in
     assert_equal 2, ActionMailer::Base.deliveries.size
+                     
   end
 
-  def test_edit_issue_single
+
+
+  def test_edit_issue_chain
     #create cain of stand-ins
-    user3pref = User.find(2).pref
-    user3pref.proxy_user_id = 1
-    assert user3pref.save
+    userpref = User.find(2).pref
+    userpref.proxy_user_id = 1
+    assert userpref.save
 
-    user3pref = User.find(1).pref
-    user3pref.proxy_user_id = 3
-    assert user3pref.save
+    userpref = User.find(1).pref
+    userpref.proxy_user_id = 4
+    assert userpref.save
 
-    user3pref = User.find(3).pref
-    user3pref.proxy_user_id = 4
-    assert user3pref.save   
+    userpref = User.find(4).pref
+    userpref.proxy_user_id = 5
+    assert userpref.save   
 
     ActionMailer::Base.deliveries.clear
 
     patch "/issues/1",
-    	  "issue"=>{"notes"=>"testaenderung2"},
+    	  "issue"=>{"notes"=>"test_edit_issue_chain"},
     	  "commit"=>"Sumbit",
     	  "id"=>"1"    
     sleep(1)
 
     assert_equal 4, ActionMailer::Base.deliveries.size
+  end
+
+  def test_edit_issue_single_assignee
+    #create cain of stand-ins
+    userpref = User.find(4).pref
+    userpref.proxy_user_id = 5
+    assert userpref.save
+    tempissue = Issue.find(1)
+    tempissue.assigned_to_id = 4
+    tempissue.save
+
+
+    ActionMailer::Base.deliveries.clear
+
+    patch "/issues/1",
+    	  "issue"=>{
+    	  	"notes"=>"test_edit_issue_single_assignee"},
+    	  "commit"=>"Sumbit"
+    	      
+    sleep(1)
+
+    assert_equal 2, ActionMailer::Base.deliveries.size
+  end
+
+
+  def test_edit_issue_two_watchers
+    #create cain of stand-ins
+    userpref = User.find(1).pref
+    userpref.proxy_user_id = 5
+    assert userpref.save
+    userpref = User.find(3).pref
+    userpref.proxy_user_id = 7
+    assert userpref.save
+    tempissue = Issue.find(2)
+    tempissue.assigned_to_id = ""
+    tempissue.author_id = ""
+    tempissue.save
+
+    ActionMailer::Base.deliveries.clear
+
+    patch "/issues/2",
+    	  "issue"=>{
+    	  	"notes"=>"test_edit_issue_two_watchers"},
+    	  "commit"=>"Sumbit"
+    	      
+    sleep(1)
+
+    
+    assert_equal 3, ActionMailer::Base.deliveries.size
   end
 
 
@@ -114,22 +170,22 @@ class StandinIntegrationTest < Redmine::IntegrationTest
     	 "commit"=>"Apply"
 
     #create cain of stand-ins
-    user3pref = User.find(2).pref
-    user3pref.proxy_user_id = 1
-    assert user3pref.save
+    userpref = User.find(2).pref
+    userpref.proxy_user_id = 1
+    assert userpref.save
 
-    user3pref = User.find(1).pref
-    user3pref.proxy_user_id = 3
-    assert user3pref.save
+    userpref = User.find(1).pref
+    userpref.proxy_user_id = 3
+    assert userpref.save
 
-    user3pref = User.find(3).pref
-    user3pref.proxy_user_id = 4
-    assert user3pref.save   
+    userpref = User.find(3).pref
+    userpref.proxy_user_id = 4
+    assert userpref.save   
 
     ActionMailer::Base.deliveries.clear
 
     patch "/issues/1",
-    	  "issue"=>{"notes"=>"testaenderung2"},
+    	  "issue"=>{"notes"=>"test_setting_no_mail_to_author"},
     	  "commit"=>"Sumbit",
     	  "id"=>"1"
     sleep(1)
@@ -138,4 +194,29 @@ class StandinIntegrationTest < Redmine::IntegrationTest
   end
 
 
+  def test_new_issue_multi
+    ActionMailer::Base.deliveries.clear
+
+    userpref = User.find(1).pref
+    userpref.proxy_user_id = 4
+    userpref.save
+
+    userpref = User.find(2).pref
+    userpref.proxy_user_id = 3
+    userpref.save
+
+    post "/projects/ecookbook/issues",
+         "issue"=>{
+         	"subject"=>"new test subject",
+         	"description"=>"test_new_issue_multi",
+         	"status_id"=>"1", 
+         	"priority_id"=>"4",
+         	"assigned_to_id"=>"2"},
+         "commit"=>"Create"
+ 
+    sleep(1)
+    #1 mail to author (user 1) + 1 mail to authors stand-in (user 4) + 1 mail to assignees stand-in (user 3)
+    assert_equal 3, ActionMailer::Base.deliveries.size
+  end
+  
 end
