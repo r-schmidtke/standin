@@ -1,2 +1,11 @@
 # standin
-Allows Redmine-users to choose another user as Stand-in. Stand-ins will receive notifications for new or edited issues.
+Installation: 
+    1. Place this plugin into the plugin folder of your redmine installation
+    2. Run "rake redmine:plugins:migrate RAILS_ENV=production"
+    3. Restart your websever
+    
+Configuration:
+    Configure the Plugin under Administration>Plugins to choose who will get Stand-In notifications
+    
+Usage:
+    Users can choose a stand-in under My_account>Preferences>Stand-in
