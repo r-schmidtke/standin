@@ -1,5 +1,5 @@
 <%= labelled_fields_for :pref, @user.pref do |pref_fields| %>
-<p><%= pref_fields.select :proxy_user_id, options_for_select(User.all.select{|s| s.type == "User"}.collect{ |u| [u.to_s, u.id] } - [[@user.to_s, @user.id]] + [[l('holidays.no_proxy'),"0"]], @user.pref[:proxy_user_id])  %> </p>@@
+<p><%= pref_fields.select :proxy_user_id, options_for_select(User.all.select{|s| s.type == "User"}.collect{ |u| [u.to_s, u.id] } - [[@user.to_s, @user.id]] + [[l('holidays.no_proxy'),"0"]], @user.pref[:proxy_user_id])  %> </p>
 <p>
 <font color="red"> <%= @user.errors.full_messages.last %> </font>
 </p>
