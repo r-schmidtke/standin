@@ -5,16 +5,18 @@ class StandinIntegrationTest < Redmine::IntegrationTest
            :groups_users,
            :versions,
            :enumerations,
-           :issues, :journals, :journal_details
+           :issues, :journals, :journal_details,
+           :enabled_modules, :issue_statuses, :workflows, :trackers, :boards, :wikis, :user_preferences, :projects_trackers, :custom_fields, :custom_values, :custom_fields_trackers
+
 
   #log in as admin and enable plugin settings
   def setup
     log_user('admin', 'admin')
     post "/settings/plugin/standin" , 
          "settings"=>{"notify_watchers"=>"true", 
-    	 "notify_author"=>"true", 
-    	 "notify_assignee"=>"true"}, 
-    	 "commit"=>"Apply"
+       "notify_author"=>"true", 
+       "notify_assignee"=>"true"}, 
+       "commit"=>"Apply"
     
     6.times do |i|
       userpref = User.find(i+1).pref
@@ -28,8 +30,8 @@ class StandinIntegrationTest < Redmine::IntegrationTest
   
   #see if the plugin settings page loads
   def test_load_settings_page
-  	get "/settings/plugin/standin"
-   	assert_response :success
+    get "/settings/plugin/standin"
+    assert_response :success
   end
 
   #set some settings for the plugin and check if they are saved
@@ -41,9 +43,9 @@ class StandinIntegrationTest < Redmine::IntegrationTest
 
     post "/settings/plugin/standin" , 
          "settings"=>{"notify_watchers"=>"true", 
-    	 "notify_author"=>"true", 
-    	 "notify_assignee"=>"true"}, 
-    	 "commit"=>"Apply"
+       "notify_author"=>"true", 
+       "notify_assignee"=>"true"}, 
+       "commit"=>"Apply"
     assert_equal( Setting.plugin_standin['notify_watchers'], "true" , failure_message = "watchers not saved" )
     assert_equal( Setting.plugin_standin['notify_author'], "true" , failure_message = "author not saved" )
     assert_equal( Setting.plugin_standin['notify_assignee'], "true" , failure_message = "assignee not saved" )
@@ -51,12 +53,12 @@ class StandinIntegrationTest < Redmine::IntegrationTest
 
   #check if proxy_user_id is saved
   def test_save_proxy
-  	#send notifications to all
-  	post "/settings/plugin/standin" , 
+    #send notifications to all
+    post "/settings/plugin/standin" , 
          "settings"=>{"notify_watchers"=>"true", 
-    	 "notify_author"=>"true", 
-    	 "notify_assignee"=>"true"}, 
-    	 "commit"=>"Apply"
+       "notify_author"=>"true", 
+       "notify_assignee"=>"true"}, 
+       "commit"=>"Apply"
 
     post "/my/account", 
          "commit"=>"Save", 
@@ -76,10 +78,10 @@ class StandinIntegrationTest < Redmine::IntegrationTest
     ActionMailer::Base.deliveries.clear
 
     patch "/issues/1", 
-    	  "issue"=>{"notes"=>"test_edit_issue_single"},
-    	  "commit"=>"Sumbit",
-    	  "id"=>"1"
-    sleep(1)
+        "issue"=>{"notes"=>"test_edit_issue_single"},
+        "commit"=>"Sumbit",
+        "id"=>"1"
+    sleep(5)
     #1 normal notification mail + 1 mail to authors stand-in
     assert_equal 2, ActionMailer::Base.deliveries.size
                      
@@ -104,9 +106,9 @@ class StandinIntegrationTest < Redmine::IntegrationTest
     ActionMailer::Base.deliveries.clear
 
     patch "/issues/1",
-    	  "issue"=>{"notes"=>"test_edit_issue_chain"},
-    	  "commit"=>"Sumbit",
-    	  "id"=>"1"    
+        "issue"=>{"notes"=>"test_edit_issue_chain"},
+        "commit"=>"Sumbit",
+        "id"=>"1"    
     sleep(1)
 
     assert_equal 4, ActionMailer::Base.deliveries.size
@@ -125,10 +127,10 @@ class StandinIntegrationTest < Redmine::IntegrationTest
     ActionMailer::Base.deliveries.clear
 
     patch "/issues/1",
-    	  "issue"=>{
-    	  	"notes"=>"test_edit_issue_single_assignee"},
-    	  "commit"=>"Sumbit"
-    	      
+        "issue"=>{
+          "notes"=>"test_edit_issue_single_assignee"},
+        "commit"=>"Sumbit"
+            
     sleep(1)
 
     assert_equal 2, ActionMailer::Base.deliveries.size
@@ -151,10 +153,10 @@ class StandinIntegrationTest < Redmine::IntegrationTest
     ActionMailer::Base.deliveries.clear
 
     patch "/issues/2",
-    	  "issue"=>{
-    	  	"notes"=>"test_edit_issue_two_watchers"},
-    	  "commit"=>"Sumbit"
-    	      
+        "issue"=>{
+          "notes"=>"test_edit_issue_two_watchers"},
+        "commit"=>"Sumbit"
+            
     sleep(1)
 
     
@@ -163,11 +165,11 @@ class StandinIntegrationTest < Redmine::IntegrationTest
 
 
   def test_setting_no_mail_to_author
-  	post "/settings/plugin/standin" , 
+    post "/settings/plugin/standin" , 
          "settings"=>{"notify_watchers"=>"true", 
-    	 "notify_author"=>"false", 
-    	 "notify_assignee"=>"true"}, 
-    	 "commit"=>"Apply"
+       "notify_author"=>"false", 
+       "notify_assignee"=>"true"}, 
+       "commit"=>"Apply"
 
     #create cain of stand-ins
     userpref = User.find(2).pref
@@ -185,9 +187,9 @@ class StandinIntegrationTest < Redmine::IntegrationTest
     ActionMailer::Base.deliveries.clear
 
     patch "/issues/1",
-    	  "issue"=>{"notes"=>"test_setting_no_mail_to_author"},
-    	  "commit"=>"Sumbit",
-    	  "id"=>"1"
+        "issue"=>{"notes"=>"test_setting_no_mail_to_author"},
+        "commit"=>"Sumbit",
+        "id"=>"1"
     sleep(1)
 
     assert_equal 1, ActionMailer::Base.deliveries.size
@@ -207,11 +209,11 @@ class StandinIntegrationTest < Redmine::IntegrationTest
 
     post "/projects/ecookbook/issues",
          "issue"=>{
-         	"subject"=>"new test subject",
-         	"description"=>"test_new_issue_multi",
-         	"status_id"=>"1", 
-         	"priority_id"=>"4",
-         	"assigned_to_id"=>"2"},
+          "subject"=>"new test subject",
+          "description"=>"test_new_issue_multi",
+          "status_id"=>"1", 
+          "priority_id"=>"4",
+          "assigned_to_id"=>"2"},
          "commit"=>"Create"
  
     sleep(1)
