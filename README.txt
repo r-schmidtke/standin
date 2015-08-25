@@ -8,4 +8,9 @@ Configuration:
     Configure the Plugin under Administration>Plugins to choose who will get Stand-In notifications
     
 Usage:
-    Users can choose a stand-in under My_account>Preferences>Stand-in
+    Users can choose a stand-in under My_account>Preferences>Stand-i
+    
+Testing:
+    Run "RAILS_ENV=test db:drop db:create db:migrate redmine:plugins:migrate" to  prepare the database for testing
+    
+    
